@@ -3,8 +3,6 @@
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
-from common.drf.serializers import AdaptedBulkListSerializer
-
 from ..models import Node, AdminUser
 from orgs.mixins.serializers import BulkOrgResourceModelSerializer
 
@@ -17,11 +15,30 @@ class AdminUserSerializer(AuthSerializerMixin, BulkOrgResourceModelSerializer):
     """
 
     class Meta:
-        list_serializer_class = AdaptedBulkListSerializer
         model = AdminUser
         fields = [
             'id', 'name', 'username', 'password', 'private_key', 'public_key',
             'comment', 'assets_amount', 'date_created', 'date_updated', 'created_by',
+        ]
+        read_only_fields = ['date_created', 'date_updated', 'created_by', 'assets_amount']
+
+        extra_kwargs = {
+            'password': {"write_only": True},
+            'private_key': {"write_only": True},
+            'public_key': {"write_only": True},
+            'assets_amount': {'label': _('Asset')},
+        }
+
+
+class AdminUserDetailSerializer(AdminUserSerializer):
+    auth_type_display = serializers.CharField(source='auth_type.label')
+
+    class Meta:
+        model = AdminUser
+        fields = [
+            'id', 'name', 'username', 'password', 'private_key', 'public_key',
+            'comment', 'assets_amount', 'date_created', 'date_updated', 'created_by',
+            'auth_type', 'auth_type_display', 'public_key_fingerprint',
         ]
         read_only_fields = ['date_created', 'date_updated', 'created_by', 'assets_amount']
 
